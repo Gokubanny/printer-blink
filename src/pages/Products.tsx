@@ -20,8 +20,8 @@ const Products = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Our Products</h1>
+        <div className="text-center mb-12 animate-fade-in">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Products</h1>
           <p className="text-xl text-muted-foreground mb-8">
             Browse our collection of quality printers
           </p>
@@ -39,15 +39,21 @@ const Products = () => {
         </div>
 
         {filteredPrinters.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-12 animate-fade-in">
             <p className="text-muted-foreground text-lg">
               {searchTerm ? 'No printers found matching your search.' : 'No printers available at the moment.'}
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPrinters.map((printer) => (
-              <ProductCard key={printer.id} printer={printer} />
+            {filteredPrinters.map((printer, index) => (
+              <div 
+                key={printer.id} 
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <ProductCard printer={printer} />
+              </div>
             ))}
           </div>
         )}

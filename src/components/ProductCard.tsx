@@ -13,33 +13,33 @@ export const ProductCard = ({ printer }: ProductCardProps) => {
   const whatsappLink = `https://wa.me/2349135114075?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col hover-scale">
       <CardHeader className="p-0">
-        <div className="aspect-square overflow-hidden">
+        <div className="aspect-square overflow-hidden relative group">
           <img
             src={printer.image}
             alt={printer.name}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
-        </div>
-      </CardHeader>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="font-semibold text-lg">{printer.name}</h3>
           {!printer.isAvailable && (
-            <Badge variant="destructive">Sold Out</Badge>
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <Badge variant="destructive" className="text-lg px-4 py-2">Sold Out</Badge>
+            </div>
           )}
         </div>
-        <p className="text-muted-foreground text-sm mb-3">{printer.description}</p>
-        <p className="text-2xl font-bold text-primary">₦{printer.price.toLocaleString()}</p>
+      </CardHeader>
+      <CardContent className="p-6 flex-1 flex flex-col">
+        <h3 className="font-semibold text-xl mb-2 line-clamp-1">{printer.name}</h3>
+        <p className="text-muted-foreground text-sm mb-4 flex-1 line-clamp-2">{printer.description}</p>
+        <p className="text-3xl font-bold text-primary mb-4">₦{printer.price.toLocaleString()}</p>
       </CardContent>
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-6 pt-0">
         <Button 
-          className="w-full" 
+          className="w-full h-12 text-base" 
           onClick={() => window.open(whatsappLink, '_blank')}
           disabled={!printer.isAvailable}
         >
-          <MessageCircle className="mr-2 h-4 w-4" />
+          <MessageCircle className="mr-2 h-5 w-5" />
           Chat on WhatsApp
         </Button>
       </CardFooter>

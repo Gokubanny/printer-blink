@@ -12,12 +12,12 @@ const Contact = () => {
       
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-6 text-center">Contact Us</h1>
-          <p className="text-center text-muted-foreground mb-12">
+          <h1 className="text-4xl font-bold mb-6 text-center animate-fade-in">Contact Us</h1>
+          <p className="text-center text-muted-foreground mb-12 animate-fade-in" style={{ animationDelay: '0.1s' }}>
             Get in touch with us for any inquiries about our printers
           </p>
           
-          <Card className="mb-6">
+          <Card className="mb-6 animate-fade-in hover-scale" style={{ animationDelay: '0.2s' }}>
             <CardContent className="p-8">
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
@@ -63,7 +63,7 @@ const Contact = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-primary text-primary-foreground">
+          <Card className="bg-primary text-primary-foreground animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <CardContent className="p-8 text-center">
               <h2 className="text-2xl font-bold mb-3">Business Hours</h2>
               <p className="text-lg opacity-90">Monday - Saturday: 9:00 AM - 6:00 PM</p>
