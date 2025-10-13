@@ -6,13 +6,11 @@ const {
   createPrinter,
   updatePrinter,
   deletePrinter,
-  toggleAvailability,
-  getPrinterStats
+  toggleAvailability
 } = require('../controllers/printerController');
 const { protect } = require('../middleware/auth');
 const {
   printerValidationRules,
-  updatePrinterValidationRules,
   idValidationRule,
   validate
 } = require('../middleware/validator');
@@ -22,10 +20,12 @@ router.get('/', getAllPrinters);
 router.get('/:id', idValidationRule(), validate, getPrinter);
 
 // Protected routes (Admin only)
-router.post('/', protect, printerValidationRules(), validate, createPrinter);
-router.put('/:id', protect, idValidationRule(), updatePrinterValidationRules(), validate, updatePrinter);
+// TEMPORARY: Remove validation to test
+router.post('/', protect, createPrinter);
+// router.post('/', protect, printerValidationRules(), validate, createPrinter);
+
+router.put('/:id', protect, idValidationRule(), printerValidationRules(), validate, updatePrinter);
 router.delete('/:id', protect, idValidationRule(), validate, deletePrinter);
 router.patch('/:id/toggle-availability', protect, idValidationRule(), validate, toggleAvailability);
-router.get('/admin/stats', protect, getPrinterStats);
 
 module.exports = router;

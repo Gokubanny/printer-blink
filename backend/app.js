@@ -13,6 +13,10 @@ const printerRoutes = require('./routes/printerRoutes');
 
 const app = express();
 
+// Body parser middleware - MUST BE FIRST!
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
 // Security middleware
 app.use(helmet());
 
@@ -23,10 +27,6 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
-
-// Body parser middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Compression middleware
 app.use(compression());

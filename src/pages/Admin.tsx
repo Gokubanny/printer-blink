@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth, usePrinters } from '@/hooks/usePrinters';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Eye, EyeOff, Printer } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 
 const Admin = () => {
   const { isAdmin, login } = useAuth();
@@ -23,50 +23,134 @@ const Admin = () => {
     description: '',
   });
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(email)) {
+    const success = await login(email);
+    if (success) {
       toast({ title: 'Welcome Admin!' });
     } else {
       toast({ title: 'Invalid email', variant: 'destructive' });
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingId) {
-      updatePrinter(editingId, {
-        ...formData,
-        price: parseFloat(formData.price),
+    setIsSubmitting(true);
+
+    console.log('=== FORM SUBMISSION DEBUG ===');
+    console.log('Form Data State:', formData);
+    console.log('Image Preview exists:', !!imagePreview);
+    console.log('All fields filled:', {
+      name: !!formData.name,
+      price: !!formData.price,
+      description: !!formData.description,
+      image: !!formData.image
+    });
+
+    // Validate form with detailed messages
+    if (!formData.name || !formData.price || !formData.description) {
+      const missingFields = [];
+      if (!formData.name) missingFields.push('name');
+      if (!formData.price) missingFields.push('price');
+      if (!formData.description) missingFields.push('description');
+      
+      toast({
+        title: 'Missing required fields',
+        description: `Please fill in: ${missingFields.join(', ')}`,
+        variant: 'destructive',
       });
-      toast({ title: 'Printer updated successfully!' });
-    } else {
-      addPrinter({
-        ...formData,
-        price: parseFloat(formData.price),
-        isAvailable: true,
-      });
-      toast({ title: 'Printer added successfully!' });
+      setIsSubmitting(false);
+      return;
     }
-    setFormData({ name: '', price: '', image: '', description: '' });
-    setShowAddDialog(false);
-    setEditingId(null);
+
+    if (!formData.image && !editingId) {
+      toast({
+        title: 'Image required',
+        description: 'Please select an image for the printer',
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const printerData = {
+        name: formData.name.trim(),
+        price: parseFloat(formData.price),
+        image: formData.image,
+        description: formData.description.trim(),
+        isAvailable: true,
+        category: 'other',
+        brand: ''
+      };
+
+      console.log('Submitting printer data to API:', printerData);
+
+      if (editingId) {
+        await updatePrinter(editingId, printerData);
+        toast({ title: 'Printer updated successfully!' });
+      } else {
+        await addPrinter(printerData);
+        toast({ title: 'Printer added successfully!' });
+      }
+
+      // Reset form
+      setFormData({ name: '', price: '', image: '', description: '' });
+      setImagePreview('');
+      setShowAddDialog(false);
+      setEditingId(null);
+    } catch (error) {
+      console.error('Form submission error:', error);
+      // Error is handled in the usePrinters hook
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log('File selected:', file.name, file.size, file.type);
+
       if (file.size > 5 * 1024 * 1024) {
-        toast({ title: 'Image too large', description: 'Please select an image under 5MB', variant: 'destructive' });
+        toast({ 
+          title: 'Image too large', 
+          description: 'Please select an image under 5MB', 
+          variant: 'destructive' 
+        });
         return;
       }
+
       const reader = new FileReader();
+      reader.onloadstart = () => {
+        console.log('Starting to read file...');
+      };
+      
       reader.onloadend = () => {
         const base64String = reader.result as string;
-        setFormData({ ...formData, image: base64String });
+        console.log('Image converted to base64, length:', base64String.length);
+        console.log('First 100 chars:', base64String.substring(0, 100));
+        
+        setFormData(prev => ({ 
+          ...prev, 
+          image: base64String 
+        }));
         setImagePreview(base64String);
+        
+        console.log('Image saved to formData:', !!base64String);
       };
+      
+      reader.onerror = (error) => {
+        console.error('FileReader error:', error);
+        toast({
+          title: 'Error reading image',
+          description: 'Failed to read the image file',
+          variant: 'destructive',
+        });
+      };
+
       reader.readAsDataURL(file);
     }
   };
@@ -86,10 +170,14 @@ const Admin = () => {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this printer?')) {
-      deletePrinter(id);
-      toast({ title: 'Printer deleted successfully!' });
+      try {
+        await deletePrinter(id);
+        toast({ title: 'Printer deleted successfully!' });
+      } catch (error) {
+        // Error is handled in the usePrinters hook
+      }
     }
   };
 
@@ -111,12 +199,14 @@ const Admin = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter admin email"
+                    placeholder="omatulemarvellous721@gmail.com"
                     className="mt-1"
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full h-12 text-base">Login</Button>
+                <Button type="submit" className="w-full h-12 text-base">
+                  Login
+                </Button>
               </form>
             </CardContent>
           </Card>
@@ -135,118 +225,148 @@ const Admin = () => {
             <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage your printer inventory</p>
           </div>
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-            <DialogTrigger asChild>
-              <Button onClick={() => {
-                setFormData({ name: '', price: '', image: '', description: '' });
-                setImagePreview('');
-                setEditingId(null);
-              }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Printer
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-2xl">{editingId ? 'Edit Printer' : 'Add New Printer'}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="name" className="text-base">Printer Name</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="e.g., HP DeskJet 2720"
-                        className="mt-1"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="price" className="text-base">Price (₦)</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        min="0"
-                        step="100"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        placeholder="e.g., 45000"
-                        className="mt-1"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="description" className="text-base">Description</Label>
-                      <Textarea
-                        id="description"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Brief description of the printer..."
-                        className="mt-1 min-h-[100px]"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
+          <Button 
+            onClick={() => {
+              console.log('Opening add printer dialog');
+              setFormData({ name: '', price: '', image: '', description: '' });
+              setImagePreview('');
+              setEditingId(null);
+              setShowAddDialog(true);
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Printer
+          </Button>
+        </div>
+
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">
+                {editingId ? 'Edit Printer' : 'Add New Printer'}
+              </DialogTitle>
+              <DialogDescription>
+                {editingId ? 'Update the printer details below.' : 'Fill in all fields to add a new printer.'}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
                   <div>
-                    <Label htmlFor="image" className="text-base">Printer Image</Label>
-                    <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-primary transition-colors">
-                      {imagePreview ? (
-                        <div className="space-y-3">
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="w-full h-48 object-cover rounded-lg"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setFormData({ ...formData, image: '' });
-                              setImagePreview('');
-                            }}
-                          >
-                            Change Image
-                          </Button>
-                        </div>
-                      ) : (
-                        <label htmlFor="image" className="cursor-pointer block">
-                          <div className="space-y-2 py-6">
-                            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                              <Plus className="h-8 w-8 text-primary" />
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              Click to upload image
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              PNG, JPG up to 5MB
-                            </p>
-                          </div>
-                          <Input
-                            id="image"
-                            type="file"
-                            accept="image/png,image/jpeg,image/jpg,image/webp"
-                            onChange={handleImageChange}
-                            className="hidden"
-                            required={!editingId}
-                          />
-                        </label>
-                      )}
-                    </div>
+                    <Label htmlFor="name" className="text-base">Printer Name *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => {
+                        console.log('Name changed:', e.target.value);
+                        setFormData(prev => ({ ...prev, name: e.target.value }));
+                      }}
+                      placeholder="e.g., HP DeskJet 2720"
+                      className="mt-1"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="price" className="text-base">Price (₦) *</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      min="0"
+                      step="100"
+                      value={formData.price}
+                      onChange={(e) => {
+                        console.log('Price changed:', e.target.value);
+                        setFormData(prev => ({ ...prev, price: e.target.value }));
+                      }}
+                      placeholder="e.g., 45000"
+                      className="mt-1"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="description" className="text-base">Description *</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => {
+                        console.log('Description changed:', e.target.value);
+                        setFormData(prev => ({ ...prev, description: e.target.value }));
+                      }}
+                      placeholder="Brief description of the printer..."
+                      className="mt-1 min-h-[100px]"
+                      required
+                    />
                   </div>
                 </div>
                 
-                <Button type="submit" className="w-full h-12 text-base">
-                  {editingId ? 'Update Printer' : 'Add Printer'}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+                <div>
+                  <Label htmlFor="image" className="text-base">
+                    Printer Image {!editingId && '*'}
+                  </Label>
+                  <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-primary transition-colors">
+                    {imagePreview ? (
+                      <div className="space-y-3">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-lg"
+                        />
+                        <div className="text-xs text-muted-foreground">
+                          Image ready: {formData.image ? 'YES' : 'NO'}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            console.log('Removing image');
+                            setFormData(prev => ({ ...prev, image: '' }));
+                            setImagePreview('');
+                          }}
+                        >
+                          Change Image
+                        </Button>
+                      </div>
+                    ) : (
+                      <label htmlFor="image" className="cursor-pointer block">
+                        <div className="space-y-2 py-6">
+                          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Plus className="h-8 w-8 text-primary" />
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Click to upload image
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            PNG, JPG up to 5MB
+                          </p>
+                        </div>
+                        <Input
+                          id="image"
+                          type="file"
+                          accept="image/png,image/jpeg,image/jpg,image/webp"
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-xs text-muted-foreground">
+                * Required fields
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : (editingId ? 'Update Printer' : 'Add Printer')}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         {printers.length === 0 ? (
           <div className="text-center py-20 animate-fade-in">

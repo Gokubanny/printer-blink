@@ -1,6 +1,5 @@
 const Printer = require('../models/Printer');
 const { successResponse, errorResponse, paginatedResponse } = require('../utils/apiResponse');
-const { uploadToCloudinary, deleteFromCloudinary, isValidBase64Image } = require('../utils/imageProcessor');
 
 /**
  * @desc    Get all printers
@@ -9,27 +8,26 @@ const { uploadToCloudinary, deleteFromCloudinary, isValidBase64Image } = require
  */
 exports.getAllPrinters = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, search, isAvailable, category, sortBy = '-createdAt' } = req.query;
+    const { page = 1, limit = 10, search, isAvailable } = req.query;
 
     // Build query
     const query = {};
 
     if (search) {
-      query.$text = { $search: search };
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
 
     if (isAvailable !== undefined) {
       query.isAvailable = isAvailable === 'true';
     }
 
-    if (category && category !== 'all') {
-      query.category = category;
-    }
-
     // Execute query with pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const printers = await Printer.find(query)
-      .sort(sortBy)
+      .sort('-createdAt')
       .limit(parseInt(limit))
       .skip(skip);
 
@@ -76,36 +74,79 @@ exports.getPrinter = async (req, res, next) => {
  */
 exports.createPrinter = async (req, res, next) => {
   try {
-    const { name, price, image, description, isAvailable, category, brand } = req.body;
-
-    let imageUrl = image;
-    let imagePublicId = null;
-
-    // Upload to Cloudinary if configured and image is base64
-    if (image && isValidBase64Image(image)) {
-      try {
-        const uploadResult = await uploadToCloudinary(image, 'printers');
-        imageUrl = uploadResult.url;
-        imagePublicId = uploadResult.publicId;
-      } catch (uploadError) {
-        console.error('Cloudinary upload failed, using base64:', uploadError.message);
-        // Continue with base64 image if Cloudinary fails
-      }
+    console.log('=== BACKEND CREATE PRINTER DEBUG ===');
+    console.log('Request body received:', JSON.stringify(req.body, null, 2));
+    console.log('Request body type:', typeof req.body);
+    console.log('Request headers:', req.headers['content-type']);
+    
+    // Check if body is empty
+    if (!req.body || Object.keys(req.body).length === 0) {
+      console.log('Request body is EMPTY');
+      return res.status(400).json({
+        success: false,
+        message: 'Request body is empty',
+        receivedBody: req.body
+      });
     }
 
+    const { name, price, image, description, isAvailable = true, category = 'other', brand = '' } = req.body;
+
+    console.log('Parsed fields:', {
+      name: name ? `"${name}" (length: ${name.length})` : 'MISSING',
+      price: price !== undefined ? price : 'MISSING',
+      description: description ? `"${description}" (length: ${description.length})` : 'MISSING',
+      image: image ? `PRESENT (length: ${image.length})` : 'MISSING',
+      isAvailable: isAvailable,
+      category: category,
+      brand: brand
+    });
+
+    // Manual validation
+    const missingFields = [];
+    if (!name || name.trim() === '') missingFields.push('name');
+    if (price === undefined || price === null) missingFields.push('price');
+    if (!description || description.trim() === '') missingFields.push('description');
+    if (!image || image.trim() === '') missingFields.push('image');
+
+    if (missingFields.length > 0) {
+      console.log('Manual validation failed - missing fields:', missingFields);
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields',
+        missing: missingFields,
+        receivedData: {
+          name: !!name,
+          price: price !== undefined,
+          description: !!description,
+          image: !!image
+        }
+      });
+    }
+
+    // Validate price is a number
+    if (isNaN(parseFloat(price))) {
+      return res.status(400).json({
+        success: false,
+        message: 'Price must be a valid number'
+      });
+    }
+
+    console.log('All validation passed - creating printer...');
+
     const printer = await Printer.create({
-      name,
-      price,
-      image: imageUrl,
-      imagePublicId,
-      description,
+      name: name.trim(),
+      price: parseFloat(price),
+      image: image,
+      description: description.trim(),
       isAvailable,
       category,
       brand
     });
 
+    console.log('Printer created successfully:', printer._id);
     successResponse(res, 201, 'Printer created successfully', printer);
   } catch (error) {
+    console.error('Create printer error:', error);
     next(error);
   }
 };
@@ -128,30 +169,7 @@ exports.updatePrinter = async (req, res, next) => {
 
     // Handle image update
     if (image && image !== printer.image) {
-      // Delete old image from Cloudinary if exists
-      if (printer.imagePublicId) {
-        try {
-          await deleteFromCloudinary(printer.imagePublicId);
-        } catch (error) {
-          console.error('Failed to delete old image:', error.message);
-        }
-      }
-
-      // Upload new image
-      if (isValidBase64Image(image)) {
-        try {
-          const uploadResult = await uploadToCloudinary(image, 'printers');
-          updateData.image = uploadResult.url;
-          updateData.imagePublicId = uploadResult.publicId;
-        } catch (uploadError) {
-          console.error('Cloudinary upload failed, using base64:', uploadError.message);
-          updateData.image = image;
-          updateData.imagePublicId = null;
-        }
-      } else {
-        updateData.image = image;
-        updateData.imagePublicId = null;
-      }
+      updateData.image = image;
     }
 
     printer = await Printer.findByIdAndUpdate(req.params.id, updateData, {
@@ -176,15 +194,6 @@ exports.deletePrinter = async (req, res, next) => {
 
     if (!printer) {
       return errorResponse(res, 404, 'Printer not found');
-    }
-
-    // Delete image from Cloudinary if exists
-    if (printer.imagePublicId) {
-      try {
-        await deleteFromCloudinary(printer.imagePublicId);
-      } catch (error) {
-        console.error('Failed to delete image:', error.message);
-      }
     }
 
     await printer.deleteOne();
@@ -212,47 +221,6 @@ exports.toggleAvailability = async (req, res, next) => {
     await printer.save();
 
     successResponse(res, 200, 'Printer availability updated', printer);
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @desc    Get printer statistics
- * @route   GET /api/printers/stats
- * @access  Private (Admin)
- */
-exports.getPrinterStats = async (req, res, next) => {
-  try {
-    const total = await Printer.countDocuments();
-    const available = await Printer.countDocuments({ isAvailable: true });
-    const soldOut = await Printer.countDocuments({ isAvailable: false });
-    
-    const totalViews = await Printer.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalViews: { $sum: '$views' }
-        }
-      }
-    ]);
-
-    const categoryStats = await Printer.aggregate([
-      {
-        $group: {
-          _id: '$category',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-
-    successResponse(res, 200, 'Statistics retrieved successfully', {
-      total,
-      available,
-      soldOut,
-      totalViews: totalViews.length > 0 ? totalViews[0].totalViews : 0,
-      categoryStats
-    });
   } catch (error) {
     next(error);
   }

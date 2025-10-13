@@ -1,100 +1,202 @@
 import { useState, useEffect } from 'react';
 import { Printer } from '@/types/printer';
+import { apiClient } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 const STORAGE_KEY = 'printers_data';
-const ADMIN_EMAIL_KEY = 'admin_email';
+const ADMIN_TOKEN_KEY = 'admin_token';
 
 export const usePrinters = () => {
   const [printers, setPrinters] = useState<Printer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      setPrinters(JSON.parse(stored));
-    } else {
-      // Initialize with sample data
-      const samplePrinters: Printer[] = [
-        {
-          id: '1',
-          name: 'HP DeskJet 2720',
-          price: 45000,
-          image: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=800&q=80',
-          description: 'All-in-one wireless printer with print, scan, and copy features',
-          isAvailable: true,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          name: 'Canon PIXMA MG3620',
-          price: 38000,
-          image: 'https://images.unsplash.com/photo-1585839152761-da1f5e7f0038?w=800&q=80',
-          description: 'Compact wireless inkjet printer perfect for home use',
-          isAvailable: true,
-          createdAt: new Date().toISOString(),
-        },
-      ];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(samplePrinters));
-      setPrinters(samplePrinters);
-    }
+    loadPrinters();
   }, []);
 
-  const savePrinters = (updatedPrinters: Printer[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPrinters));
-    setPrinters(updatedPrinters);
+  const loadPrinters = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.getPrinters();
+      setPrinters(response.data);
+    } catch (error: any) {
+      console.error('Failed to load printers:', error);
+      // Use localStorage as fallback if backend is not available
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        setPrinters(JSON.parse(stored));
+      }
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to load printers',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addPrinter = (printer: Omit<Printer, 'id' | 'createdAt'>) => {
-    const newPrinter: Printer = {
-      ...printer,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-    };
-    savePrinters([...printers, newPrinter]);
+  const addPrinter = async (printer: Omit<Printer, 'id' | 'createdAt'>) => {
+    try {
+      const response = await apiClient.createPrinter(printer);
+      const newPrinter = response.data;
+      setPrinters(prev => [...prev, newPrinter]);
+      
+      // Update localStorage as backup
+      const updatedPrinters = [...printers, newPrinter];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPrinters));
+      
+      toast({
+        title: 'Success',
+        description: 'Printer added successfully',
+      });
+      return newPrinter;
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to add printer',
+        variant: 'destructive',
+      });
+      throw error;
+    }
   };
 
-  const updatePrinter = (id: string, updates: Partial<Printer>) => {
-    savePrinters(printers.map(p => p.id === id ? { ...p, ...updates } : p));
+  const updatePrinter = async (id: string, updates: Partial<Printer>) => {
+    try {
+      const response = await apiClient.updatePrinter(id, updates);
+      const updatedPrinter = response.data;
+      setPrinters(prev => prev.map(p => p.id === id ? updatedPrinter : p));
+      
+      // Update localStorage as backup
+      const updatedPrinters = printers.map(p => p.id === id ? updatedPrinter : p);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPrinters));
+      
+      toast({
+        title: 'Success',
+        description: 'Printer updated successfully',
+      });
+      return updatedPrinter;
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update printer',
+        variant: 'destructive',
+      });
+      throw error;
+    }
   };
 
-  const deletePrinter = (id: string) => {
-    savePrinters(printers.filter(p => p.id !== id));
+  const deletePrinter = async (id: string) => {
+    try {
+      await apiClient.deletePrinter(id);
+      setPrinters(prev => prev.filter(p => p.id !== id));
+      
+      // Update localStorage as backup
+      const updatedPrinters = printers.filter(p => p.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPrinters));
+      
+      toast({
+        title: 'Success',
+        description: 'Printer deleted successfully',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete printer',
+        variant: 'destructive',
+      });
+      throw error;
+    }
   };
 
-  const toggleAvailability = (id: string) => {
-    savePrinters(printers.map(p => p.id === id ? { ...p, isAvailable: !p.isAvailable } : p));
+  const toggleAvailability = async (id: string) => {
+    try {
+      const response = await apiClient.toggleAvailability(id);
+      const updatedPrinter = response.data;
+      setPrinters(prev => prev.map(p => p.id === id ? updatedPrinter : p));
+      
+      // Update localStorage as backup
+      const updatedPrinters = printers.map(p => p.id === id ? updatedPrinter : p);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPrinters));
+      
+      toast({
+        title: 'Success',
+        description: `Printer ${updatedPrinter.isAvailable ? 'enabled' : 'disabled'}`,
+      });
+      return updatedPrinter;
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update availability',
+        variant: 'destructive',
+      });
+      throw error;
+    }
   };
 
   return {
     printers,
+    loading,
     addPrinter,
     updatePrinter,
     deletePrinter,
     toggleAvailability,
+    refreshPrinters: loadPrinters,
   };
 };
 
 export const useAuth = () => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const ADMIN_EMAIL = 'omatulemarvellous721@gmail.com';
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const storedEmail = localStorage.getItem(ADMIN_EMAIL_KEY);
-    setIsAdmin(storedEmail === ADMIN_EMAIL);
+    checkAuth();
   }, []);
 
-  const login = (email: string) => {
-    if (email === ADMIN_EMAIL) {
-      localStorage.setItem(ADMIN_EMAIL_KEY, email);
-      setIsAdmin(true);
-      return true;
+  const checkAuth = async () => {
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+    if (token) {
+      try {
+        await apiClient.getMe();
+        setIsAdmin(true);
+      } catch (error) {
+        localStorage.removeItem(ADMIN_TOKEN_KEY);
+        setIsAdmin(false);
+      }
     }
-    return false;
+    setLoading(false);
+  };
+
+  const login = async (email: string) => {
+    try {
+      const response = await apiClient.login(email);
+      localStorage.setItem(ADMIN_TOKEN_KEY, response.data.token);
+      setIsAdmin(true);
+      toast({
+        title: 'Success',
+        description: 'Login successful!',
+      });
+      return true;
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Login failed',
+        variant: 'destructive',
+      });
+      return false;
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem(ADMIN_EMAIL_KEY);
+    localStorage.removeItem(ADMIN_TOKEN_KEY);
     setIsAdmin(false);
+    toast({
+      title: 'Success',
+      description: 'Logged out successfully',
+    });
   };
 
-  return { isAdmin, login, logout };
+  return { isAdmin, loading, login, logout };
 };
