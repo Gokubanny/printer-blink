@@ -1,6 +1,6 @@
 const app = require('./app');
 const connectDB = require('./config/database');
-const { port, nodeEnv } = require('./src/config/env');
+const { port, nodeEnv } = require('./config/env');
 
 // Connect to database
 connectDB();

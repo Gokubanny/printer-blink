@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
-const { jwtSecret, jwtExpire, adminEmail } = require('../src/config/env');
+const { jwtSecret, jwtExpire, adminEmail } = require('../config/env');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
 /**

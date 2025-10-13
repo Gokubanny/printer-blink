@@ -1,46 +1,57 @@
-const errorHandler = (err, req, res, next) => {
-    let error = { ...err };
-    error.message = err.message;
-  
-    // Log error for dev
-    if (process.env.NODE_ENV === 'development') {
-      console.error(err);
+const jwt = require('jsonwebtoken');
+const Admin = require('../models/Admin');
+const { jwtSecret } = require('../config/env');
+const { errorResponse } = require('../utils/apiResponse');
+
+/**
+ * Protect routes - Verify JWT token
+ */
+exports.protect = async (req, res, next) => {
+  try {
+    let token;
+
+    // Check for token in headers
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
     }
-  
-    // Mongoose bad ObjectId
-    if (err.name === 'CastError') {
-      const message = 'Resource not found';
-      error = { message, statusCode: 404 };
+
+    // Make sure token exists
+    if (!token) {
+      return errorResponse(res, 401, 'Not authorized to access this route');
     }
-  
-    // Mongoose duplicate key
-    if (err.code === 11000) {
-      const message = 'Duplicate field value entered';
-      error = { message, statusCode: 400 };
+
+    try {
+      // Verify token
+      const decoded = jwt.verify(token, jwtSecret);
+
+      // Get admin from token
+      req.admin = await Admin.findById(decoded.id);
+
+      if (!req.admin) {
+        return errorResponse(res, 401, 'Admin not found');
+      }
+
+      if (!req.admin.isActive) {
+        return errorResponse(res, 401, 'Admin account is inactive');
+      }
+
+      next();
+    } catch (error) {
+      return errorResponse(res, 401, 'Not authorized to access this route');
     }
-  
-    // Mongoose validation error
-    if (err.name === 'ValidationError') {
-      const message = Object.values(err.errors).map(val => val.message).join(', ');
-      error = { message, statusCode: 400 };
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Grant access to specific roles
+ */
+exports.authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.admin.role)) {
+      return errorResponse(res, 403, `User role ${req.admin.role} is not authorized to access this route`);
     }
-  
-    // JWT errors
-    if (err.name === 'JsonWebTokenError') {
-      const message = 'Invalid token';
-      error = { message, statusCode: 401 };
-    }
-  
-    if (err.name === 'TokenExpiredError') {
-      const message = 'Token expired';
-      error = { message, statusCode: 401 };
-    }
-  
-    res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || 'Server Error',
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-    });
+    next();
   };
-  
-  module.exports = errorHandler;
+};
