@@ -6,6 +6,23 @@ import { useToast } from '@/hooks/use-toast';
 const STORAGE_KEY = 'printers_data';
 const ADMIN_TOKEN_KEY = 'admin_token';
 
+// Helper function to normalize printer data from backend
+const normalizePrinter = (data: any): Printer => {
+  return {
+    id: data._id || data.id,
+    name: data.name,
+    price: data.price,
+    image: data.image,
+    description: data.description,
+    isAvailable: data.isAvailable,
+    createdAt: data.createdAt,
+    views: data.views,
+    category: data.category,
+    brand: data.brand,
+    imagePublicId: data.imagePublicId,
+  };
+};
+
 export const usePrinters = () => {
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +36,11 @@ export const usePrinters = () => {
     try {
       setLoading(true);
       const response = await apiClient.getPrinters();
-      setPrinters(response.data);
+      const normalizedPrinters = response.data.map(normalizePrinter);
+      setPrinters(normalizedPrinters);
+      
+      // Update localStorage as backup
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizedPrinters));
     } catch (error: any) {
       console.error('Failed to load printers:', error);
       // Use localStorage as fallback if backend is not available
@@ -40,7 +61,7 @@ export const usePrinters = () => {
   const addPrinter = async (printer: Omit<Printer, 'id' | 'createdAt'>) => {
     try {
       const response = await apiClient.createPrinter(printer);
-      const newPrinter = response.data;
+      const newPrinter = normalizePrinter(response.data);
       setPrinters(prev => [...prev, newPrinter]);
       
       // Update localStorage as backup
@@ -65,7 +86,7 @@ export const usePrinters = () => {
   const updatePrinter = async (id: string, updates: Partial<Printer>) => {
     try {
       const response = await apiClient.updatePrinter(id, updates);
-      const updatedPrinter = response.data;
+      const updatedPrinter = normalizePrinter(response.data);
       setPrinters(prev => prev.map(p => p.id === id ? updatedPrinter : p));
       
       // Update localStorage as backup
@@ -113,7 +134,7 @@ export const usePrinters = () => {
   const toggleAvailability = async (id: string) => {
     try {
       const response = await apiClient.toggleAvailability(id);
-      const updatedPrinter = response.data;
+      const updatedPrinter = normalizePrinter(response.data);
       setPrinters(prev => prev.map(p => p.id === id ? updatedPrinter : p));
       
       // Update localStorage as backup

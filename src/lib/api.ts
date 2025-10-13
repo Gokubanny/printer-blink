@@ -16,12 +16,12 @@ class ApiClient {
     console.log('Headers:', options.headers);
     console.log('Body:', options.body);
 
-    const config = {
+    const config: RequestInit = {
+      ...options,
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
       },
-      ...options,
     };
 
     try {
@@ -51,12 +51,13 @@ class ApiClient {
     const token = localStorage.getItem('admin_token');
     console.log('Auth Token:', token ? 'Present' : 'Missing');
     
-    const headers = {
-      'Authorization': token ? `Bearer ${token}` : '',
-      ...options.headers,
-    };
-
-    return this.request(endpoint, { ...options, headers });
+    return this.request(endpoint, {
+      ...options,
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        ...options.headers,
+      },
+    });
   }
 
   // Auth endpoints
@@ -119,6 +120,7 @@ class ApiClient {
     };
 
     console.log('Final data being sent to backend:', dataToSend);
+    console.log('Stringified body:', JSON.stringify(dataToSend));
 
     return this.authRequest('/printers', {
       method: 'POST',
@@ -161,3 +163,6 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
+
+// Note: Make sure your printer objects returned from the backend have an 'id' field
+// The backend is returning '_id' from MongoDB, so you might need to map it to 'id'
