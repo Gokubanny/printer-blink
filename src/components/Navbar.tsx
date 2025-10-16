@@ -99,7 +99,7 @@ export const Navbar = () => {
               >
                 Contact
               </Link>
-              {isAdmin ? (
+              {/* {isAdmin ? (
                 <>
                   <Link 
                     to="/admin" 
@@ -117,12 +117,12 @@ export const Navbar = () => {
                   </button>
                 </>
               ) : (
-                // <Link to="/admin" onClick={closeMobileMenu}>
-                //   <Button variant="outline" className="w-full mx-4" size="sm">
-                //     Admin Login
-                //   </Button>
-                // </Link>
-              )}
+                <Link to="/admin" onClick={closeMobileMenu}>
+                  <Button variant="outline" className="w-full mx-4" size="sm">
+                    Admin Login
+                  </Button>
+                </Link>
+              )} */}
             </div>
           </div>
         )}
