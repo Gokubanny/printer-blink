@@ -6,7 +6,7 @@ module.exports = {
   nodeEnv: process.env.NODE_ENV || 'development',
   
   // Database Configuration
-  mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/printhub',
+  mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/Hyperdist',
   
   // JWT Configuration
   jwtSecret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',

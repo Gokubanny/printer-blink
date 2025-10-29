@@ -1,7 +1,7 @@
 {
-  "name": "printhub-backend",
+  "name": "Hyperdist-backend",
   "version": "1.0.0",
-  "description": "PrintHub Backend API",
+  "description": "Hyperdist Backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -27,6 +27,6 @@
     "nodemon": "^3.1.10"
   },
   "keywords": ["printers", "api", "ecommerce"],
-  "author": "PrintHub",
+  "author": "Hyperdist",
   "license": "MIT"
 }

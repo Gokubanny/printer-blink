@@ -65,7 +65,7 @@ app.use('/api/printers', printerRoutes);
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Welcome to PrintHub API',
+    message: 'Welcome to Hyperdist API',
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',

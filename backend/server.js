@@ -10,7 +10,7 @@ const server = app.listen(port, () => {
   console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
-║           🖨️  PrintHub API Server                    ║
+║           🖨️  Hyperdist API Server                    ║
 ║                                                       ║
 ║   Server running in ${nodeEnv} mode                 ║
 ║   Port: ${port}                                      ║

@@ -6,7 +6,7 @@ const cloudinary = require('../config/cloudinary');
  * @param {String} folder - Cloudinary folder name
  * @returns {Promise<Object>} - Returns secure_url and public_id
  */
-exports.uploadToCloudinary = async (base64Image, folder = 'printhub') => {
+exports.uploadToCloudinary = async (base64Image, folder = 'Hyperdist') => {
   try {
     const result = await cloudinary.uploader.upload(base64Image, {
       folder: folder,

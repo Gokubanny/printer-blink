@@ -24,7 +24,7 @@ export const Navbar = () => {
         <div className="flex h-14 sm:h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-bold text-lg sm:text-xl" onClick={closeMobileMenu}>
             <Printer className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-            <span className="hidden xs:inline">PrintHub</span>
+            <span className="hidden xs:inline">Hyperdist</span>
           </Link>
           
           {/* Desktop Navigation */}

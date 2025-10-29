@@ -8,13 +8,13 @@ const About = () => {
       
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold mb-6 text-center animate-fade-in">About PrintHub</h1>
+          <h1 className="text-4xl font-bold mb-6 text-center animate-fade-in">About Hyperdist</h1>
           
           <Card className="mb-6 animate-fade-in hover-scale" style={{ animationDelay: '0.1s' }}>
             <CardContent className="p-8">
               <h2 className="text-2xl font-semibold mb-4">Who We Are</h2>
               <p className="text-muted-foreground mb-4">
-                PrintHub is your trusted source for quality printers and printing solutions. 
+                Hyperdist is your trusted source for quality printers and printing solutions. 
                 We specialize in providing a wide range of printers suitable for home offices, 
                 small businesses, and professional environments.
               </p>
