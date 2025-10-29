@@ -41,7 +41,7 @@ export const Navbar = () => {
             <Link to="/contact" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
               Contact
             </Link>
-            {isAdmin ? (
+            {/* {isAdmin ? (
               <>
                 <Link to="/admin" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
                   Admin
@@ -55,7 +55,7 @@ export const Navbar = () => {
               <Link to="/admin">
                 <Button variant="outline" size="sm">Admin</Button>
               </Link>
-            )}
+            )} */}
           </div>
 
           {/* Mobile Menu Button */}
@@ -99,7 +99,7 @@ export const Navbar = () => {
               >
                 Contact
               </Link>
-              {isAdmin ? (
+              {/* {isAdmin ? (
                 <>
                   <Link 
                     to="/admin" 
@@ -122,7 +122,7 @@ export const Navbar = () => {
                     Admin Login
                   </Button>
                 </Link>
-              )}
+              )} */}
             </div>
           </div>
         )}
