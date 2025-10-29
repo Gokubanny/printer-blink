@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://printer-blink-uqb0.onrender.com/api';
+// Force production URL - CRITICAL FIX
+const API_BASE_URL = 'https://printer-blink.onrender.com/api';
 
 class ApiClient {
   private baseUrl: string;
