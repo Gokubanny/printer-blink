@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Printer, Shield, Clock, Star, TrendingUp, Award, CheckCircle, MessageCircle } from 'lucide-react';
+import { Navbar } from '@/components/Navbar';
+import { Link } from 'react-router-dom';
 
 export default function EnhancedHome() {
   const [scrollY, setScrollY] = useState(0);
@@ -42,7 +44,7 @@ export default function EnhancedHome() {
         setCustomerCount(Math.floor((500 * step) / steps));
         setPrintersCount(Math.floor((150 * step) / steps));
         setSatisfactionCount(Math.floor((99 * step) / steps));
-        
+
         if (step >= steps) clearInterval(timer);
       }, interval);
 
@@ -98,6 +100,7 @@ export default function EnhancedHome() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Navbar />
       {/* Floating WhatsApp Button */}
       <a
         href="https://wa.me/2349135114075?text=Hello,%20I%20would%20like%20to%20inquire%20about%20your%20printers"
@@ -133,23 +136,25 @@ export default function EnhancedHome() {
                 🏆 Trusted Printer Provider in Nigeria
               </div>
             </div>
-            
+
             <h1 className="text-5xl md:text-7xl font-bold mb-6 text-slate-900 leading-tight">
               Quality Printers for<br />Every Need
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-slate-600 mb-10 leading-relaxed max-w-3xl mx-auto">
               Find the perfect printer for your home or office. From compact inkjets to professional laser printers.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <button className="group px-8 py-4 bg-slate-900 text-white rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-slate-800 transition-all duration-300 hover:scale-105">
-                <span className="flex items-center justify-center gap-2">
-                  Browse Products
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </span>
-              </button>
-              
+              <Link to="/products">
+                <button className="group px-8 py-4 bg-slate-900 text-white rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-slate-800 transition-all duration-300 hover:scale-105">
+                  <span className="flex items-center justify-center gap-2">
+                    Browse Products
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </span>
+                </button>
+              </Link>
+
               <button className="px-8 py-4 bg-white border-2 border-slate-200 text-slate-900 rounded-lg font-semibold text-lg hover:border-slate-900 hover:bg-slate-50 transition-all duration-300 hover:scale-105 shadow-sm">
                 Contact Us
               </button>
@@ -158,7 +163,7 @@ export default function EnhancedHome() {
             {/* Trust Badges */}
             <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-700">
               {whyChooseUs.map((item, index) => (
-                <div 
+                <div
                   key={index}
                   className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-300"
                 >
@@ -190,7 +195,7 @@ export default function EnhancedHome() {
                 <div className="text-lg text-slate-400">Happy Customers</div>
               </div>
             </div>
-            
+
             <div className="group">
               <div className="bg-slate-800 rounded-xl p-8 hover:bg-slate-750 transition-all duration-300 border border-slate-700 hover:border-slate-600">
                 <div className="text-5xl font-bold mb-2 text-white">
@@ -199,7 +204,7 @@ export default function EnhancedHome() {
                 <div className="text-lg text-slate-400">Printers Sold</div>
               </div>
             </div>
-            
+
             <div className="group">
               <div className="bg-slate-800 rounded-xl p-8 hover:bg-slate-750 transition-all duration-300 border border-slate-700 hover:border-slate-600">
                 <div className="text-5xl font-bold mb-2 text-white">
@@ -233,10 +238,10 @@ export default function EnhancedHome() {
                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg bg-slate-900 mb-6 group-hover:scale-110 transition-transform duration-300">
                   <feature.icon className="h-7 w-7 text-white" />
                 </div>
-                
+
                 <h3 className="text-2xl font-bold mb-3 text-slate-900">{feature.title}</h3>
                 <p className="text-slate-600 leading-relaxed">{feature.description}</p>
-                
+
                 <div className="mt-6 flex items-center text-slate-900 font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   Learn more
                   <span className="ml-2 group-hover:translate-x-2 transition-transform">→</span>
@@ -270,11 +275,11 @@ export default function EnhancedHome() {
                     <Star key={i} className="h-5 w-5 text-amber-400 fill-amber-400" />
                   ))}
                 </div>
-                
+
                 <p className="text-slate-700 mb-6 leading-relaxed">
                   "{testimonial.content}"
                 </p>
-                
+
                 <div className="border-t border-slate-200 pt-4">
                   <div className="font-semibold text-slate-900">{testimonial.name}</div>
                   <div className="text-sm text-slate-600">{testimonial.role}</div>
@@ -303,7 +308,7 @@ export default function EnhancedHome() {
               <p className="text-xl mb-8 text-slate-300 max-w-2xl mx-auto">
                 Contact us today to find the perfect printer for your needs
               </p>
-              
+
               <button className="group px-10 py-5 bg-white text-slate-900 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <span className="flex items-center justify-center gap-2">
                   Get in Touch
