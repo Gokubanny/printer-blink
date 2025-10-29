@@ -99,7 +99,7 @@ export const Navbar = () => {
               >
                 Contact
               </Link>
-              {/* {isAdmin ? (
+              {isAdmin ? (
                 <>
                   <Link 
                     to="/admin" 
@@ -122,7 +122,7 @@ export const Navbar = () => {
                     Admin Login
                   </Button>
                 </Link>
-              )} */}
+              )}
             </div>
           </div>
         )}
