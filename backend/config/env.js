@@ -16,7 +16,7 @@ module.exports = {
   adminEmail: process.env.ADMIN_EMAIL || 'omatulemarvellous721@gmail.com',
   
   // Frontend Configuration
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8080',
+  frontendUrl: process.env.FRONTEND_URL || 'https://printer-blink-uqb0.onrender.com',
   
   // Rate Limiting Configuration
   rateLimit: {
