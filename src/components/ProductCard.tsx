@@ -10,7 +10,7 @@ interface ProductCardProps {
 
 export const ProductCard = ({ printer }: ProductCardProps) => {
   const whatsappMessage = `Hello, I'm interested in the ${printer.name} I saw on your website.`;
-  const whatsappLink = `https://wa.link/vsk687?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappLink = `https://wa.link/iy0oov?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col hover-scale">

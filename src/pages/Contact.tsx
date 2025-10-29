@@ -43,7 +43,7 @@ const Contact = () => {
                   <div className="flex-1">
                     <h3 className="font-semibold mb-2">Phone</h3>
                     <p className="text-muted-foreground">
-                      +234 913 511 4075
+                      +234 701 400 6669 
                     </p>
                   </div>
                 </div>
@@ -55,7 +55,7 @@ const Contact = () => {
                   <div className="flex-1">
                     <h3 className="font-semibold mb-2">Email</h3>
                     <p className="text-muted-foreground">
-                      omatulemarvellous721@gmail.com
+                      sales@hyperdistng.com
                     </p>
                   </div>
                 </div>

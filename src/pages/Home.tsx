@@ -103,18 +103,19 @@ export default function EnhancedHome() {
       <Navbar />
       {/* Floating WhatsApp Button */}
       <a
-        href="https://wa.me/2349135114075?text=Hello,%20I%20would%20like%20to%20inquire%20about%20your%20printers"
+        href="https://wa.me/2347014006669?text=Hello%2C%20I%20would%20like%20to%20inquire%20about%20your%20printers"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 group"
       >
+
         <div className="relative">
-          <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75"></div>
-          <div className="relative bg-green-500 text-white p-4 rounded-full shadow-lg hover:shadow-xl hover:bg-green-600 transition-all duration-300 hover:scale-110">
+          <div className="absolute inset-0 bg-primary rounded-full animate-ping opacity-75"></div>
+          <div className="relative bg-primary text-white p-4 rounded-full shadow-lg hover:shadow-xl hover:bg-primary transition-all duration-300 hover:scale-110">
             <MessageCircle className="h-6 w-6" />
           </div>
         </div>
-        <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-900 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+        <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-primary text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
           Chat with us!
         </div>
       </a>
@@ -132,7 +133,7 @@ export default function EnhancedHome() {
         <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-block mb-6">
-              <div className="bg-slate-900 text-white px-5 py-2 rounded-full text-sm font-medium shadow-sm">
+              <div className="bg-primary text-white px-5 py-2 rounded-full text-sm font-medium shadow-sm">
                 🏆 Trusted Printer Provider in Nigeria
               </div>
             </div>
@@ -147,7 +148,7 @@ export default function EnhancedHome() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Link to="/products">
-                <button className="group px-8 py-4 bg-slate-900 text-white rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-slate-800 transition-all duration-300 hover:scale-105">
+                <button className="group px-8 py-4 bg-primary text-white rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-primary-500 transition-all duration-300 hover:scale-105">
                   <span className="flex items-center justify-center gap-2">
                     Browse Products
                     <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -161,13 +162,13 @@ export default function EnhancedHome() {
             </div>
 
             {/* Trust Badges */}
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-700">
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-800">
               {whyChooseUs.map((item, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-300"
+                  className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-lg shadow-sm border border-primary/800 hover:bg-primary/20 hover:border-primary transition-all duration-300"
                 >
-                  <item.icon className="h-4 w-4 text-slate-900" />
+                  <item.icon className="h-4 w-4 text-primary" />
                   <span className="font-medium">{item.text}</span>
                 </div>
               ))}
@@ -184,38 +185,46 @@ export default function EnhancedHome() {
       </section>
 
       {/* Stats Section */}
-      <section id="stats-section" className="py-20 bg-slate-900 text-white">
+      <section id="stats-section" className="py-20 bg-primary text-white">
         <div className="container mx-auto px-4">
+          <h2 className="text-center text-3xl font-bold mb-12 text-white">
+            Our Achievements
+          </h2>
+
           <div className="grid md:grid-cols-3 gap-8 text-center">
+            {/* Card 1 */}
             <div className="group">
-              <div className="bg-slate-800 rounded-xl p-8 hover:bg-slate-750 transition-all duration-300 border border-slate-700 hover:border-slate-600">
-                <div className="text-5xl font-bold mb-2 text-white">
+              <div className="bg-primary/70 backdrop-blur-md rounded-xl p-8 hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-slate-600/30">
+                <div className="text-5xl font-extrabold mb-2 text-white group-hover:scale-110 transition-transform duration-300">
                   {customerCount}+
                 </div>
-                <div className="text-lg text-slate-400">Happy Customers</div>
+                <div className="text-lg text-slate-300">Happy Customers</div>
               </div>
             </div>
 
+            {/* Card 2 */}
             <div className="group">
-              <div className="bg-slate-800 rounded-xl p-8 hover:bg-slate-750 transition-all duration-300 border border-slate-700 hover:border-slate-600">
-                <div className="text-5xl font-bold mb-2 text-white">
+              <div className="bg-primary/70 backdrop-blur-md rounded-xl p-8  hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-slate-600/30">
+                <div className="text-5xl font-extrabold mb-2 text-white group-hover:scale-110 transition-transform duration-300">
                   {printersCount}+
                 </div>
-                <div className="text-lg text-slate-400">Printers Sold</div>
+                <div className="text-lg text-slate-300">Printers Sold</div>
               </div>
             </div>
 
+            {/* Card 3 */}
             <div className="group">
-              <div className="bg-slate-800 rounded-xl p-8 hover:bg-slate-750 transition-all duration-300 border border-slate-700 hover:border-slate-600">
-                <div className="text-5xl font-bold mb-2 text-white">
+              <div className="bg-primary/70 backdrop-blur-md rounded-xl p-8  hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-slate-600/30">
+                <div className="text-5xl font-extrabold mb-2 text-white group-hover:scale-110 transition-transform duration-300">
                   {satisfactionCount}%
                 </div>
-                <div className="text-lg text-slate-400">Satisfaction Rate</div>
+                <div className="text-lg text-slate-300">Satisfaction Rate</div>
               </div>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* Features Section */}
       <section className="py-20 bg-white">
@@ -235,7 +244,7 @@ export default function EnhancedHome() {
                 key={index}
                 className="group relative bg-white rounded-xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-slate-200 hover:border-slate-300"
               >
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg bg-slate-900 mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg bg-primary mb-6 group-hover:scale-110 transition-transform duration-300">
                   <feature.icon className="h-7 w-7 text-white" />
                 </div>
 
@@ -293,7 +302,7 @@ export default function EnhancedHome() {
       {/* CTA Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="relative bg-slate-900 rounded-2xl p-12 md:p-16 text-center shadow-xl overflow-hidden">
+          <div className="relative bg-primary rounded-2xl p-12 md:p-16 text-center shadow-xl overflow-hidden">
             <div className="absolute inset-0 opacity-5">
               <div className="absolute inset-0" style={{
                 backgroundImage: `radial-gradient(circle at 1px 1px, rgb(255 255 255) 1px, transparent 0)`,
